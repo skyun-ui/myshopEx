@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout}">
+
+<div layout:fragment="content">
+  <div class="container mt-4">
+    <form class="form-inline justify-content-center mb-3" th:object="${itemSearchDto}" method="get" th:action="@{/}">
+      <input th:field="*{searchQuery}" type="text" class="form-control mr-2" placeholder="상품명을 검색해보세요">
+      <button type="submit" class="btn btn-primary">검색</button>
+    </form>
+
+    <div class="row" th:if="${items != null}">
+      <div class="col-md-4 mb-3" th:each="item : ${items.getContent()}">
+        <div class="card h-100">
+          <img th:if="${not #strings.isEmpty(item.imgUrl)}" th:src="${item.imgUrl}" class="card-img-top" alt="상품 이미지">
+          <div class="card-body">
+            <h5 class="card-title" th:text="${item.itemName}">상품명</h5>
+            <p class="card-text text-truncate" th:text="${item.itemDetail}">상품설명</p>
+            <p class="card-text"><strong th:text="${#numbers.formatInteger(item.price, 0, 'COMMA')}">0</strong> 원</p>
+            <a class="btn btn-outline-primary" th:href="@{'/item/' + ${item.id}}">상세보기</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div th:if="${items != null}"
+         th:with="start=${(items.number/maxPage)*maxPage + 1}, end=(${(items.totalPages == 0) ? 1 : (start + (maxPage - 1) < items.totalPages ? start + (maxPage - 1) : items.totalPages)})">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" th:classappend="${items.first}?'disabled'">
+          <a class="page-link" th:href="@{/ (page=${items.number - 1}, searchQuery=${itemSearchDto.searchQuery})}">Previous</a>
+        </li>
+        <li class="page-item" th:each="page: ${#numbers.sequence(start, end)}" th:classappend="${items.number eq page-1}?'active':''">
+          <a class="page-link" th:href="@{/ (page=${page - 1}, searchQuery=${itemSearchDto.searchQuery})}" th:text="${page}">1</a>
+        </li>
+        <li class="page-item" th:classappend="${items.last}?'disabled'">
+          <a class="page-link" th:href="@{/ (page=${items.number + 1}, searchQuery=${itemSearchDto.searchQuery})}">Next</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</html>
